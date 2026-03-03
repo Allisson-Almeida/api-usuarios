@@ -1,0 +1,52 @@
+services: #configurar os serviços que o Docker irá rodar
+
+  apiusuarios: #Serviço da API
+    build:
+      context: . #Projeto raiz
+      dockerfile: Dockerfile #Arquivo que publica o projeto
+    container_name: api-usuarios-springboot #Nome do container
+    restart: always #Iniciar automaticamente
+    ports: #portas para execução
+      - "8082:8082" #Porta externa / Porta interna
+    depends_on:
+      - postgres
+      - rabbitmq
+      - mailhog
+
+  postgres: #Serviço do PostgreSQL
+    image: postgres:16
+    container_name: api-usuarios-postgresql
+    restart: always
+    environment:
+      POSTGRES_DB: bd_apiusuarios
+      POSTGRES_USER: user_apiusuarios
+      POSTGRES_PASSWORD: pass_apiusuarios
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_apiusuarios:/var/lib/postgresql/data
+
+  rabbitmq: #Serviço do RabbitMQ
+    image: rabbitmq:3-management
+    container_name: api-usuarios-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # Porta AMQP
+      - "15672:15672" # Painel web
+    environment:
+      RABBITMQ_DEFAULT_USER: user_rabbit
+      RABBITMQ_DEFAULT_PASS: pass_rabbit
+    volumes:
+      - rabbitmq_apiusuarios:/var/lib/rabbitmq
+
+  mailhog: #Serviço do MailHog
+    image: mailhog/mailhog
+    container_name: api-usuarios-mailhog
+    restart: always
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Interface Web
+
+volumes:
+  postgres_apiusuarios:
+  rabbitmq_apiusuarios:
